@@ -1,0 +1,18 @@
+name: Check standalone app
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node -e "const fs=require('fs');const html=fs.readFileSync('index.html','utf8');const scripts=[...html.matchAll(/<script(?![^>]*\\bsrc=)[^>]*>([\\s\\S]*?)<\\/script>/gi)];if(!scripts.length)throw Error('No inline script found');for(const [,source] of scripts)new Function(source);if(/<script[^>]+src\\s*=/i.test(html))throw Error('External script dependency found');console.log('Standalone HTML checks passed')"

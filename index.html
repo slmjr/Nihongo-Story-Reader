@@ -1,0 +1,348 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>Nihongo Story Reader</title>
+  <style>
+    :root{--bg:#0d1117;--panel:#151b24;--panel2:#1c2430;--line:#2b3646;--text:#eef3f8;--muted:#9eabb9;--accent:#f3b563;--accent2:#f7cf96;--green:#73daca;--red:#ff8490;--shadow:0 18px 55px rgba(0,0,0,.28)}
+    *{box-sizing:border-box}
+    body{margin:0;background:radial-gradient(circle at 20% 0,#1c2533 0,transparent 34rem),var(--bg);color:var(--text);font:15px/1.55 Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;min-height:100vh}
+    button,input,select,textarea{font:inherit}
+    button{cursor:pointer}
+    button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,ruby:focus-visible{outline:3px solid rgba(243,181,99,.42);outline-offset:2px}
+    .wrap{width:min(1080px,calc(100% - 28px));margin:auto;padding:34px 0 70px}
+    header{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;margin-bottom:24px}
+    .eyebrow{color:var(--accent);font-size:.75rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase}
+    h1{font-size:clamp(2rem,5vw,3.55rem);line-height:1.03;margin:.35rem 0 .65rem;letter-spacing:-.045em}
+    .lead{margin:0;color:var(--muted);max-width:690px;font-size:1.03rem}
+    .privacy{border:1px solid var(--line);color:var(--muted);border-radius:999px;padding:8px 12px;white-space:nowrap;font-size:.82rem;background:rgba(21,27,36,.72)}
+    .panel{background:linear-gradient(145deg,rgba(28,36,48,.97),rgba(21,27,36,.97));border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow)}
+    .builder{padding:22px}
+    .grid{display:grid;grid-template-columns:repeat(12,1fr);gap:15px}
+    .field{grid-column:span 3}
+    .field.wide{grid-column:span 6}
+    label,.label{display:block;color:var(--muted);font-size:.76rem;font-weight:750;letter-spacing:.05em;text-transform:uppercase;margin:0 0 7px}
+    input,select,textarea{width:100%;background:#0e141c;color:var(--text);border:1px solid var(--line);border-radius:11px;padding:11px 12px}
+    textarea{resize:vertical;min-height:170px;line-height:1.45}
+    .segments{display:flex;background:#0e141c;border:1px solid var(--line);padding:4px;border-radius:12px;gap:3px}
+    .segments button{flex:1;background:transparent;color:var(--muted);border:0;border-radius:8px;padding:8px 10px;font-weight:700}
+    .segments button.on{background:var(--panel2);color:var(--accent2);box-shadow:0 1px 5px rgba(0,0,0,.3)}
+    .provider{grid-column:1/-1;border-top:1px solid var(--line);margin-top:3px;padding-top:17px}
+    .provider-body{display:none;margin-top:13px}
+    .provider-body.on{display:block}
+    .provider-row{display:grid;grid-template-columns:2fr 1fr auto;gap:10px;align-items:end}
+    .endpoint-field{margin-bottom:10px}
+    .check{display:flex;align-items:center;gap:8px;color:var(--muted);text-transform:none;letter-spacing:0;margin-top:10px}
+    .check input{width:auto}
+    .note{font-size:.83rem;color:var(--muted);margin:8px 0 0}
+    .note a{color:var(--accent2)}
+    .security-note{border-left:3px solid var(--accent);background:#101720;border-radius:0 9px 9px 0;padding:9px 11px;margin-top:11px}
+    .actions{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-top:18px}
+    .btn{border:1px solid var(--line);border-radius:11px;padding:10px 15px;background:var(--panel2);color:var(--text);font-weight:750}
+    .btn:hover{border-color:#526177;transform:translateY(-1px)}
+    .btn.primary{background:var(--accent);border-color:var(--accent);color:#20170b}
+    .btn.quiet{background:transparent;color:var(--muted)}
+    .btn.small{padding:7px 10px;font-size:.84rem}
+    .btn:disabled{opacity:.5;cursor:wait;transform:none}
+    .status{color:var(--muted);font-size:.88rem;margin-left:auto}
+    .status.error{color:var(--red)}
+    .reader{display:none;margin-top:22px;overflow:visible}
+    .reader.on{display:block}
+    .reader-head{display:flex;gap:15px;justify-content:space-between;align-items:flex-start;padding:21px 22px;border-bottom:1px solid var(--line)}
+    .meta{color:var(--muted);font-size:.82rem;margin-bottom:4px}
+    .title-jp{font-family:"Yu Mincho","Hiragino Mincho ProN","Noto Serif JP",serif;font-size:clamp(1.5rem,4vw,2.15rem);line-height:2;margin:0}
+    .title-en{color:var(--muted);font-size:.9rem}
+    .reader-tools{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+    .story{padding:10px 22px 22px;overflow:visible}
+    .paragraph{padding:19px 0 15px;border-bottom:1px solid var(--line);overflow:visible}
+    .paragraph:last-child{border-bottom:0}
+    .japanese{font-family:"Yu Mincho","Hiragino Mincho ProN","Noto Serif JP",serif;font-size:clamp(1.28rem,3.2vw,1.72rem);line-height:2.45;letter-spacing:.035em;padding:.4rem 2px .1rem;overflow:visible}
+    ruby{ruby-position:over;ruby-align:center;text-align:center}
+    rt{color:var(--accent2);font-family:"Yu Gothic","Hiragino Kaku Gothic ProN",sans-serif;font-size:.48em;font-weight:600;line-height:1;letter-spacing:.025em;user-select:none}
+    .reader[data-furigana="off"] rt{visibility:hidden}
+    .reader[data-furigana="hint"] rt{visibility:hidden}
+    .reader[data-furigana="hint"] ruby:hover rt,.reader[data-furigana="hint"] ruby:focus rt{visibility:visible}
+    .translation{display:none;color:#c8d1dc;background:#101720;border-left:3px solid var(--accent);border-radius:0 9px 9px 0;padding:9px 12px;margin:5px 0 8px}
+    .translation.on{display:block}
+    .para-actions{display:flex;gap:8px;margin-top:6px}
+    .study{display:grid;grid-template-columns:1fr 1fr;gap:18px;border-top:1px solid var(--line);padding:20px 22px}
+    .study h3{margin:0 0 10px;font-size:.9rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+    .chips{display:flex;gap:8px;flex-wrap:wrap}
+    .chip{background:#101720;border:1px solid var(--line);border-radius:10px;padding:8px 10px}
+    .chip b{color:var(--accent2);font-family:"Yu Gothic",sans-serif}
+    .chip span{color:var(--muted);font-size:.84rem;margin-left:6px}
+    .grammar{margin:0;padding-left:18px;color:#d3dbe4}
+    .grammar li+li{margin-top:8px}
+    .empty{color:var(--muted);font-size:.9rem}
+    .toast{position:fixed;right:18px;bottom:18px;background:#243043;color:var(--text);border:1px solid #45546a;border-radius:10px;padding:10px 14px;box-shadow:var(--shadow);opacity:0;transform:translateY(10px);pointer-events:none;transition:.18s}
+    .toast.on{opacity:1;transform:none}
+    .support-bar{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;margin-top:22px;padding:15px 18px;background:linear-gradient(135deg,rgba(243,181,99,.09),rgba(115,218,202,.05));border:1px solid var(--line);border-radius:15px}
+    .support-bar strong{display:block;color:var(--accent2);margin-bottom:2px}.support-bar p{margin:0;color:var(--muted);font-size:.82rem}.support-bar .btn{text-decoration:none;white-space:nowrap}
+    .support-actions{width:min(100%,330px);display:grid;gap:8px;flex:0 0 auto}
+    .support-main{text-align:center}
+    .crypto-support{border:1px solid var(--line);border-radius:11px;background:rgba(14,20,28,.55);overflow:hidden}
+    .crypto-support summary{cursor:pointer;list-style:none;padding:9px 12px;color:var(--muted);font-size:.84rem;font-weight:750;text-align:center;user-select:none}
+    .crypto-support summary::-webkit-details-marker{display:none}
+    .crypto-support summary::after{content:' +';color:var(--accent2);margin-left:5px}
+    .crypto-support[open] summary{border-bottom:1px solid var(--line);color:var(--text)}
+    .crypto-support[open] summary::after{content:' −'}
+    .crypto-wallets{display:grid;gap:9px;padding:11px}
+    .crypto-caution{color:var(--muted);font-size:.75rem;line-height:1.4}
+    .wallet-row{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:9px}
+    .wallet-info{min-width:0}.wallet-info b{display:block;color:var(--text);font-size:.76rem;margin-bottom:2px}.wallet-info code{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--green);font-size:.7rem}
+    .wallet-copy{padding:6px 9px!important;font-size:.75rem!important}
+    @media(max-width:760px){.wrap{width:min(100% - 20px,1080px);padding-top:22px}header{display:block}.privacy{display:inline-block;margin-top:14px}.field,.field.wide{grid-column:1/-1}.provider-row,.study{grid-template-columns:1fr}.reader-head{display:block}.reader-tools{justify-content:flex-start;margin-top:14px}.builder,.reader-head,.story,.study{padding-left:15px;padding-right:15px}.status{width:100%;margin-left:0}.japanese{font-size:1.28rem;line-height:2.55}.support-bar{flex-direction:column}.support-actions{width:100%}.support-main{width:100%}.wallet-copy{width:auto!important}}
+    @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
+  </style>
+</head>
+<body>
+<main class="wrap">
+  <header>
+    <div><div class="eyebrow">Japanese reading practice</div><h1>Nihongo Story Reader</h1><p class="lead">Generate a level-appropriate story, reveal readings only when you need them, and listen paragraph by paragraph.</p></div>
+    <div class="privacy">Standalone · direct provider connection</div>
+  </header>
+
+  <section class="panel builder" aria-label="Story builder">
+    <div class="grid">
+      <div class="field"><label for="level">JLPT level</label><select id="level"><option>N5</option><option>N4</option><option selected>N3</option><option>N2</option><option>N1</option></select></div>
+      <div class="field"><label for="length">Story length</label><select id="length"><option value="micro">Very short</option><option value="short" selected>Short</option><option value="standard">Standard</option></select></div>
+      <div class="field"><span class="label">Speech style</span><div class="segments" id="styleChoice"><button type="button" data-value="polite" class="on">Polite</button><button type="button" data-value="casual">Casual</button></div></div>
+      <div class="field"><span class="label">Provider</span><div class="segments" id="providerChoice"><button type="button" data-value="venice" class="on">Venice</button><button type="button" data-value="openai">OpenAI API</button><button type="button" data-value="custom">Custom API</button></div></div>
+      <div class="field wide"><label for="theme">Theme or situation</label><input id="theme" value="a small discovery on the train" maxlength="180"></div>
+      <div class="field wide"><span class="label">Ideas</span><button class="btn quiet" id="surprise" type="button">Surprise me</button></div>
+
+      <div class="provider">
+        <div class="provider-body on" id="veniceProvider">
+          <div class="provider-row"><div><label for="apiKey">Venice API key</label><input id="apiKey" type="password" autocomplete="off" placeholder="Paste your Venice API key"></div><div><label for="model">Text model</label><input id="model" value="zai-org-glm-5-1"></div><button class="btn small" id="showKey" type="button">Show key</button></div>
+          <label class="check"><input id="rememberKey" type="checkbox"> Remember the key on this device</label>
+          <p class="note">Otherwise the key lasts only for this browser tab. Story generation goes directly from your browser to Venice.</p>
+        </div>
+        <div class="provider-body" id="openaiProvider">
+          <div class="endpoint-field"><label for="openaiEndpoint">OpenAI endpoint</label><input id="openaiEndpoint" value="https://api.openai.com/v1/chat/completions" readonly></div>
+          <div class="provider-row"><div><label for="openaiKey">OpenAI API key</label><input id="openaiKey" type="password" autocomplete="off" placeholder="Paste your OpenAI API key"></div><div><label for="openaiModel">Text model</label><input id="openaiModel" value="gpt-5.4-mini"></div><button class="btn small" id="showOpenaiKey" type="button">Show key</button></div>
+          <label class="check"><input id="rememberOpenaiKey" type="checkbox"> Remember the key on this device</label>
+          <p class="note security-note"><strong>Important:</strong> OpenAI API usage is billed separately from a ChatGPT subscription. By default, your key lasts only for this browser tab. <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener noreferrer">Create or manage an API key</a>.</p>
+        </div>
+        <div class="provider-body" id="customProvider">
+          <div class="endpoint-field"><label for="customEndpoint">Chat Completions endpoint</label><input id="customEndpoint" type="url" placeholder="https://provider.example/v1/chat/completions"></div>
+          <div class="provider-row"><div><label for="customKey">API key (if required)</label><input id="customKey" type="password" autocomplete="off" placeholder="Paste this provider's API key"></div><div><label for="customModel">Text model</label><input id="customModel" placeholder="Provider model ID"></div><button class="btn small" id="showCustomKey" type="button">Show key</button></div>
+          <label class="check"><input id="rememberCustomKey" type="checkbox"> Remember the key on this device</label>
+          <p class="note">For services that accept the OpenAI Chat Completions format. Remote endpoints must use HTTPS; HTTP is allowed only for a server on this device. The endpoint must allow requests from a browser.</p>
+        </div>
+        <p class="note security-note">A standalone HTML file cannot fully hide an API key. Use a restricted or easily revocable key, avoid shared devices, and only enable “Remember” on a device you trust. Keys are sent only to the provider endpoint you select.</p>
+      </div>
+    </div>
+    <div class="actions"><button class="btn primary" id="generate" type="button">Generate with Venice</button><button class="btn" id="sample" type="button">Load sample story</button><span class="status" id="status" role="status">Ready.</span></div>
+  </section>
+
+  <section class="panel reader" id="reader" data-furigana="always" aria-live="polite">
+    <div class="reader-head">
+      <div><div class="meta" id="storyMeta"></div><h2 class="title-jp" id="titleJp"></h2><div class="title-en" id="titleEn"></div></div>
+      <div class="reader-tools"><div class="segments" id="furiganaChoice" aria-label="Furigana display"><button type="button" data-value="always" class="on">Always</button><button type="button" data-value="hint">Hint</button><button type="button" data-value="off">Hidden</button></div><button class="btn small" id="allTranslations" type="button">Show English</button><button class="btn small" id="copyStory" type="button">Copy story</button></div>
+    </div>
+    <div class="story" id="story"></div>
+    <div class="study"><div><h3>Useful words</h3><div class="chips" id="vocabulary"></div></div><div><h3>Grammar to notice</h3><ul class="grammar" id="grammar"></ul></div></div>
+  </section>
+  <aside class="support-bar" aria-label="Optional project support">
+    <div><strong>&#9749; Support Nihongo Story Reader</strong><p>Every feature stays free. Optional support helps maintain and improve the reader.</p></div>
+    <div class="support-actions">
+      <a class="btn primary support-main" href="https://ko-fi.com/smjp53096" target="_blank" rel="noopener noreferrer">Buy me a coffee on Ko-fi</a>
+      <details class="crypto-support">
+        <summary>Crypto addresses</summary>
+        <div class="crypto-wallets">
+          <div class="crypto-caution">Verify the network and full address before sending. Crypto transfers cannot be reversed.</div>
+          <div class="wallet-row"><div class="wallet-info"><b>EVM</b><code title="0x56F9ef45f059db623fC971dFfF79B3Aa5717cFDb">0x56F9ef45f059db623fC971dFfF79B3Aa5717cFDb</code></div><button class="btn wallet-copy" type="button" data-wallet="EVM" data-address="0x56F9ef45f059db623fC971dFfF79B3Aa5717cFDb" aria-label="Copy EVM address">Copy</button></div>
+          <div class="wallet-row"><div class="wallet-info"><b>Bitcoin</b><code title="bc1q89jdjfnds2sgnuzqqjhqmnlcahu9zcpx23ycgh">bc1q89jdjfnds2sgnuzqqjhqmnlcahu9zcpx23ycgh</code></div><button class="btn wallet-copy" type="button" data-wallet="Bitcoin" data-address="bc1q89jdjfnds2sgnuzqqjhqmnlcahu9zcpx23ycgh" aria-label="Copy Bitcoin address">Copy</button></div>
+          <div class="wallet-row"><div class="wallet-info"><b>Solana</b><code title="HDt7aHZSe2w4CjHj4sNFHAbQVdShADBrgS1hRrRo1n8b">HDt7aHZSe2w4CjHj4sNFHAbQVdShADBrgS1hRrRo1n8b</code></div><button class="btn wallet-copy" type="button" data-wallet="Solana" data-address="HDt7aHZSe2w4CjHj4sNFHAbQVdShADBrgS1hRrRo1n8b" aria-label="Copy Solana address">Copy</button></div>
+        </div>
+      </details>
+    </div>
+  </aside>
+</main>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+(() => {
+  'use strict';
+  const $ = id => document.getElementById(id);
+  const state = {provider:'venice', style:'polite', furigana:'always', story:null, audio:null, audioUrl:null, translations:false};
+  const lengthRules = {
+    micro:'ONE compact micro-story: exactly 1 paragraph and 2–3 short sentences, roughly 50–100 Japanese characters.',
+    short:'A short story: 2 paragraphs and 4–6 sentences total, roughly 140–260 Japanese characters.',
+    standard:'A fuller story: 4–5 paragraphs and 8–12 sentences total, roughly 350–650 Japanese characters.'
+  };
+  const levelRules = {
+    N5:'very basic vocabulary and grammar; short, direct sentences; common N5 kanji only',
+    N4:'elementary vocabulary and grammar; mostly short sentences; N5–N4 kanji',
+    N3:'intermediate everyday vocabulary, natural sentence links, and N5–N3 kanji',
+    N2:'advanced vocabulary, varied sentence structures, and natural nuance',
+    N1:'expert vocabulary and syntax while remaining coherent and readable'
+  };
+  const themes = ['a cat waiting outside a bakery','a forgotten umbrella at a quiet station','an early morning at a mountain shrine','a tiny secondhand bookshop','a first day at a countryside school','a mysterious note inside a library book','neighbors preparing for a summer festival','a late-night bowl of ramen','a grandmother teaching an old recipe','a bicycle ride beside the rice fields','a rainy afternoon in a kissaten','missing the last train home'];
+  const sample = {
+    title:[{text:'雨',reading:'あめ'},{text:'の',reading:''},{text:'駅',reading:'えき'}], title_english:'The Station in the Rain',
+    paragraphs:[
+      {segments:[{text:'今日',reading:'きょう'},{text:'は',reading:''},{text:'朝',reading:'あさ'},{text:'から',reading:''},{text:'雨',reading:'あめ'},{text:'だった。',reading:''},{text:'美咲',reading:'みさき'},{text:'は',reading:''},{text:'駅',reading:'えき'},{text:'で',reading:''},{text:'小',reading:'ちい'},{text:'さな',reading:''},{text:'赤',reading:'あか'},{text:'い',reading:''},{text:'傘',reading:'かさ'},{text:'を',reading:''},{text:'見',reading:'み'},{text:'つけた。',reading:''}],english:'It had been raining since morning. Misaki found a small red umbrella at the station.'},
+      {segments:[{text:'傘',reading:'かさ'},{text:'には「',reading:''},{text:'大切',reading:'たいせつ'},{text:'にしてね」と',reading:''},{text:'書',reading:'か'},{text:'いてあった。',reading:''},{text:'美咲',reading:'みさき'},{text:'は',reading:''},{text:'駅員',reading:'えきいん'},{text:'に',reading:''},{text:'渡',reading:'わた'},{text:'し、',reading:''},{text:'少',reading:'すこ'},{text:'し',reading:''},{text:'嬉',reading:'うれ'},{text:'しい',reading:''},{text:'気持',reading:'きも'},{text:'ちで',reading:''},{text:'電車',reading:'でんしゃ'},{text:'に',reading:''},{text:'乗',reading:'の'},{text:'った。',reading:''}],english:'The umbrella said, “Please take care of me.” Misaki gave it to the station attendant and boarded her train feeling a little happy.'}
+    ],
+    vocabulary:[{word:'駅員',reading:'えきいん',meaning:'station attendant'},{word:'大切',reading:'たいせつ',meaning:'important; precious'},{word:'渡す',reading:'わたす',meaning:'to hand over'}],
+    grammar:[{pattern:'〜てあった',meaning:'something had been done and remained that way'},{pattern:'〜で',meaning:'with / in a state of (linking to the next action)'}]
+  };
+
+  function setStatus(message, error=false){$('status').textContent=message;$('status').classList.toggle('error',error)}
+  function toast(message){$('toast').textContent=message;$('toast').classList.add('on');clearTimeout(toast.timer);toast.timer=setTimeout(()=>$('toast').classList.remove('on'),1800)}
+  function setSegment(group,value){document.querySelectorAll('#'+group+' button').forEach(b=>b.classList.toggle('on',b.dataset.value===value))}
+  function selectProvider(provider){
+    if(!['venice','openai','custom'].includes(provider))provider='venice';
+    state.provider=provider;setSegment('providerChoice',provider);
+    ['venice','openai','custom'].forEach(name=>$(name+'Provider').classList.toggle('on',provider===name));
+    $('generate').textContent=provider==='venice'?'Generate with Venice':provider==='openai'?'Generate with OpenAI':'Generate with custom API';
+    savePrefs();
+  }
+  function selectStyle(style){state.style=style;setSegment('styleChoice',style);savePrefs()}
+  function setFurigana(mode){state.furigana=mode;$('reader').dataset.furigana=mode;setSegment('furiganaChoice',mode);savePrefs()}
+  function savePrefs(){
+    localStorage.setItem('nihongo_reader_prefs',JSON.stringify({provider:state.provider,style:state.style,furigana:state.furigana,level:$('level').value,length:$('length').value,veniceModel:$('model').value,openaiModel:$('openaiModel').value,customEndpoint:$('customEndpoint').value,customModel:$('customModel').value}));
+  }
+  function restoreKey(storageName,inputId,rememberId){
+    const remembered=localStorage.getItem(storageName),session=sessionStorage.getItem(storageName);
+    if(remembered){$(inputId).value=remembered;$(rememberId).checked=true}else if(session){$(inputId).value=session}
+  }
+  function persistKey(storageName,inputId,rememberId){
+    const key=$(inputId).value.trim();
+    if($(rememberId).checked){if(key)localStorage.setItem(storageName,key);else localStorage.removeItem(storageName);sessionStorage.removeItem(storageName)}
+    else{if(key)sessionStorage.setItem(storageName,key);else sessionStorage.removeItem(storageName);localStorage.removeItem(storageName)}
+  }
+  function restore(){
+    let p={};try{p=JSON.parse(localStorage.getItem('nihongo_reader_prefs')||'{}')}catch(e){}
+    if(p.level)$('level').value=p.level;if(p.length)$('length').value=p.length;
+    if(p.veniceModel)$('model').value=p.veniceModel;if(p.openaiModel)$('openaiModel').value=p.openaiModel;
+    if(p.customEndpoint)$('customEndpoint').value=p.customEndpoint;if(p.customModel)$('customModel').value=p.customModel;
+    restoreKey('nihongo_venice_key','apiKey','rememberKey');restoreKey('nihongo_openai_key','openaiKey','rememberOpenaiKey');restoreKey('nihongo_custom_key','customKey','rememberCustomKey');
+    selectStyle(p.style||'polite');selectProvider(p.provider||'venice');setFurigana(p.furigana||'always');
+  }
+
+  function buildPrompt(){
+    const level=$('level').value, length=$('length').value, theme=$('theme').value.trim()||'daily life';
+    const style=state.style==='polite'?'Use natural polite です／ます style throughout.':'Use natural casual/plain style throughout; avoid です／ます unless quoted dialogue requires it.';
+    return `Create Japanese reading practice as strict JSON.\n\nLearner: JLPT ${level} (${levelRules[level]}).\nTheme: ${theme}.\nLength: ${lengthRules[length]}\nStyle: ${style}\n\nReturn ONLY one JSON object matching this shape:\n{\n  "title": [{"text":"日本","reading":"にほん"},{"text":"の朝","reading":""}],\n  "title_english": "English title",\n  "paragraphs": [\n    {\n      "segments": [\n        {"text":"今日","reading":"きょう"},\n        {"text":"は晴れです。","reading":""}\n      ],\n      "english": "Natural English translation"\n    }\n  ],\n  "vocabulary": [{"word":"今日","reading":"きょう","meaning":"today"}],\n  "grammar": [{"pattern":"〜ています","meaning":"ongoing action or state"}]\n}\n\nFURIGANA RULES — follow exactly:\n- Split Japanese into ordered segments. Concatenating every segment.text must reproduce the complete Japanese story.\n- Any segment containing kanji MUST have its correct contextual reading in hiragana. Group an entire natural compound when possible (for example 今日／きょう, not separate character readings).\n- Kana, punctuation, and other kanji-free text use an empty reading.\n- Put okurigana outside the kanji segment: write [{"text":"食","reading":"た"},{"text":"べる","reading":""}], not a reading for 食べる.\n- Do not output HTML, Markdown, romaji, or spaces between normal Japanese words.\n- Check every reading carefully, including names and counters.\n- Include 3–6 useful vocabulary items and 1–3 concise grammar notes.\n- The English must translate its own paragraph, not summarize it.`
+  }
+
+  function extractJSON(raw){
+    let s=String(raw||'').trim().replace(/^```(?:json)?\s*/i,'').replace(/\s*```$/,'');
+    try{return JSON.parse(s)}catch(e){}
+    const start=s.indexOf('{');if(start<0)throw new Error('The provider response did not contain a JSON story.');
+    let depth=0,quoted=false,escaped=false;
+    for(let i=start;i<s.length;i++){const c=s[i];if(escaped){escaped=false;continue}if(c==='\\'){escaped=true;continue}if(c==='"'){quoted=!quoted;continue}if(quoted)continue;if(c==='{')depth++;if(c==='}')depth--;if(depth===0){try{return JSON.parse(s.slice(start,i+1))}catch(e){}}}
+    throw new Error('The response contains incomplete or invalid JSON.');
+  }
+  function clean(value,max=8000){return String(value==null?'':value).replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g,'').slice(0,max)}
+  function legacySegments(html){
+    const doc=new DOMParser().parseFromString('<div>'+clean(html,20000)+'</div>','text/html'),out=[];
+    function add(text,reading=''){text=clean(text,1000);reading=clean(reading,200);if(!text)return;const last=out[out.length-1];if(last&&last.reading===reading)last.text+=text;else out.push({text,reading})}
+    function walk(node){if(node.nodeType===3){add(node.nodeValue);return}if(node.nodeType!==1)return;if(node.tagName.toLowerCase()==='ruby'){const rt=node.querySelector(':scope > rt');let base='';node.childNodes.forEach(n=>{if(!(n.nodeType===1&&['rt','rp'].includes(n.tagName.toLowerCase())))base+=n.textContent});add(base,rt?rt.textContent:'');return}node.childNodes.forEach(walk)}
+    [...doc.body.firstChild.childNodes].forEach(walk);return out;
+  }
+  function normalizeSegments(value){
+    if(typeof value==='string')return legacySegments(value);
+    if(!Array.isArray(value))return [];
+    return value.slice(0,800).map(s=>({text:clean(s&&s.text,1000),reading:clean(s&&s.reading,200).replace(/\s+/g,'')})).filter(s=>s.text);
+  }
+  function normalizeStory(data){
+    if(!data||typeof data!=='object')throw new Error('The response is not a story object.');
+    const paragraphs=(Array.isArray(data.paragraphs)?data.paragraphs:[]).slice(0,12).map(p=>({segments:normalizeSegments(p.segments||p.japanese||p.furigana||p.jp),english:clean(p.english||p.en,4000)})).filter(p=>p.segments.length);
+    if(!paragraphs.length)throw new Error('No usable paragraphs were found. The response must include segment arrays.');
+    const title=normalizeSegments(data.title_segments||data.title); const fallbackTitle=typeof data.title==='string'?[{text:clean(data.title,300),reading:''}]:[{text:'読解練習',reading:'どっかいれんしゅう'}];
+    const vocabulary=(Array.isArray(data.vocabulary)?data.vocabulary:[]).slice(0,12).map(v=>({word:clean(v.word,100),reading:clean(v.reading,100),meaning:clean(v.meaning,300)})).filter(v=>v.word);
+    const grammar=(Array.isArray(data.grammar)?data.grammar:[]).slice(0,8).map(g=>({pattern:clean(g.pattern,150),meaning:clean(g.meaning,500)})).filter(g=>g.pattern);
+    return {title:title.length?title:fallbackTitle,title_english:clean(data.title_english||data.english_title,500),paragraphs,vocabulary,grammar};
+  }
+
+  function appendSegments(container,segments){segments.forEach(s=>{if(s.reading){const ruby=document.createElement('ruby');ruby.tabIndex=0;const rb=document.createElement('rb');rb.textContent=s.text;const rp1=document.createElement('rp');rp1.textContent='(';const rt=document.createElement('rt');rt.textContent=s.reading;const rp2=document.createElement('rp');rp2.textContent=')';ruby.append(rb,rp1,rt,rp2);container.appendChild(ruby)}else container.appendChild(document.createTextNode(s.text))})}
+  function plainSegments(segments){return segments.map(s=>s.text).join('')}
+  function render(story,source='Sample'){
+    stopAudio();state.story=story;state.translations=false;$('allTranslations').textContent='Show English';
+    $('titleJp').replaceChildren();appendSegments($('titleJp'),story.title);$('titleEn').textContent=story.title_english;
+    $('storyMeta').textContent=source==='Sample'?'N3 · Short sample · Furigana demonstration':`${$('level').value} · ${$('length').selectedOptions[0].text} · ${state.style==='polite'?'Polite':'Casual'} · ${source}`;
+    $('story').replaceChildren();story.paragraphs.forEach((p,index)=>{
+      const card=document.createElement('article');card.className='paragraph';
+      const jp=document.createElement('div');jp.className='japanese';jp.lang='ja';appendSegments(jp,p.segments);
+      const en=document.createElement('div');en.className='translation';en.textContent=p.english;
+      const actions=document.createElement('div');actions.className='para-actions';
+      const reveal=document.createElement('button');reveal.className='btn small quiet';reveal.textContent='English';reveal.addEventListener('click',()=>{en.classList.toggle('on');reveal.textContent=en.classList.contains('on')?'Hide English':'English'});
+      const listen=document.createElement('button');listen.className='btn small quiet';listen.textContent='Listen';listen.addEventListener('click',()=>speakParagraph(index,listen));actions.append(reveal,listen);card.append(jp,en,actions);$('story').appendChild(card)
+    });
+    $('vocabulary').replaceChildren();if(story.vocabulary.length)story.vocabulary.forEach(v=>{const el=document.createElement('div');el.className='chip';const b=document.createElement('b');b.textContent=v.word+(v.reading?'【'+v.reading+'】':'');const span=document.createElement('span');span.textContent=v.meaning;el.append(b,span);$('vocabulary').appendChild(el)});else{const e=document.createElement('span');e.className='empty';e.textContent='No vocabulary list supplied.';$('vocabulary').appendChild(e)}
+    $('grammar').replaceChildren();if(story.grammar.length)story.grammar.forEach(g=>{const li=document.createElement('li');const b=document.createElement('b');b.textContent=g.pattern+' — ';li.append(b,document.createTextNode(g.meaning));$('grammar').appendChild(li)});else{const li=document.createElement('li');li.className='empty';li.textContent='No grammar notes supplied.';$('grammar').appendChild(li)}
+    setFurigana(state.furigana);$('reader').classList.add('on');$('reader').scrollIntoView({behavior:'smooth',block:'start'});setStatus('Story ready. Click a kanji in Hint mode to reveal its reading.');
+    try{localStorage.setItem('nihongo_latest_story',JSON.stringify(story))}catch(e){}
+  }
+
+  function selectedProvider(){
+    if(state.provider==='openai')return {id:'openai',label:'OpenAI',endpoint:$('openaiEndpoint').value.trim(),key:$('openaiKey').value.trim(),keyInput:'openaiKey',model:$('openaiModel').value.trim(),modelInput:'openaiModel',storage:'nihongo_openai_key',remember:'rememberOpenaiKey'};
+    if(state.provider==='custom')return {id:'custom',label:'Custom API',endpoint:$('customEndpoint').value.trim(),key:$('customKey').value.trim(),keyInput:'customKey',model:$('customModel').value.trim(),modelInput:'customModel',storage:'nihongo_custom_key',remember:'rememberCustomKey'};
+    return {id:'venice',label:'Venice',endpoint:'https://api.venice.ai/api/v1/chat/completions',key:$('apiKey').value.trim(),keyInput:'apiKey',model:$('model').value.trim(),modelInput:'model',storage:'nihongo_venice_key',remember:'rememberKey'};
+  }
+  function validateProvider(config){
+    if(!config.endpoint){setStatus('Enter the Chat Completions endpoint first.',true);$('customEndpoint').focus();return false}
+    try{const url=new URL(config.endpoint),local=['localhost','127.0.0.1','::1','[::1]'].includes(url.hostname);if(url.protocol!=='https:'&&!(url.protocol==='http:'&&local))throw new Error()}catch(e){setStatus('Use an HTTPS endpoint. HTTP is allowed only for a server on this device.',true);if(config.id==='custom')$('customEndpoint').focus();return false}
+    if(!config.key&&config.id!=='custom'){setStatus(`Enter ${config.id==='openai'?'an':'a'} ${config.label} API key first.`,true);$(config.keyInput).focus();return false}
+    if(!config.model){setStatus(`Enter a ${config.label} model ID.`,true);$(config.modelInput).focus();return false}
+    return true;
+  }
+  async function apiErrorDetail(response){
+    let text='';try{text=await response.text()}catch(e){return ''}
+    try{const json=JSON.parse(text);return clean(json?.error?.message||json?.message||'',240)}catch(e){return clean(text.replace(/<[^>]+>/g,' '),240).replace(/\s+/g,' ').trim()}
+  }
+  function completionText(payload){
+    const content=payload?.choices?.[0]?.message?.content;
+    if(typeof content==='string')return content;
+    if(Array.isArray(content))return content.map(part=>typeof part==='string'?part:(part?.text||part?.content||'')).join('');
+    return '';
+  }
+  async function callChatCompletions(config,prompt){
+    const headers={'Content-Type':'application/json'};if(config.key)headers.Authorization='Bearer '+config.key;
+    const body={model:config.model,messages:[{role:'system',content:'You are a careful Japanese teacher and JSON generator. Return only valid JSON. Never return HTML or Markdown.'},{role:'user',content:prompt}]};
+    if(config.id==='venice')Object.assign(body,{temperature:.75,max_completion_tokens:5000,venice_parameters:{include_venice_system_prompt:false,disable_thinking:true,strip_thinking_response:true}});
+    if(config.id==='openai')Object.assign(body,{max_completion_tokens:5000,response_format:{type:'json_object'}});
+    if(config.id==='custom')Object.assign(body,{max_tokens:5000});
+    let response;try{response=await fetch(config.endpoint,{method:'POST',headers,body:JSON.stringify(body)})}catch(e){throw new Error(`Could not reach ${config.label}. Check the endpoint, your connection, and whether the provider permits direct browser requests.`)}
+    if(!response.ok){const detail=await apiErrorDetail(response);throw new Error(`${config.label} returned ${response.status}${detail?': '+detail:''}`)}
+    let payload;try{payload=await response.json()}catch(e){throw new Error(`${config.label} returned a response that was not JSON.`)}
+    const raw=completionText(payload);if(!raw)throw new Error(`${config.label} returned no story text.`);return raw;
+  }
+  async function generate(){
+    savePrefs();const prompt=buildPrompt(),config=selectedProvider();if(!validateProvider(config))return;
+    persistKey(config.storage,config.keyInput,config.remember);savePrefs();
+    $('generate').disabled=true;setStatus(`${config.label} is writing and checking the readings…`);
+    try{const raw=await callChatCompletions(config,prompt);render(normalizeStory(extractJSON(raw)),config.label)}catch(error){setStatus(error.message||'Story generation failed.',true)}finally{$('generate').disabled=false}
+  }
+
+  function stopAudio(){speechSynthesis.cancel();if(state.audio){state.audio.pause();state.audio=null}if(state.audioUrl){URL.revokeObjectURL(state.audioUrl);state.audioUrl=null}}
+  async function speakParagraph(index,button){stopAudio();const text=plainSegments(state.story.paragraphs[index].segments);const key=$('apiKey').value.trim();button.disabled=true;button.textContent='Playing…';
+    const reset=()=>{button.disabled=false;button.textContent='Listen'};
+    if(state.provider==='venice'&&key){try{const r=await fetch('https://api.venice.ai/api/v1/audio/speech',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},body:JSON.stringify({model:'tts-kokoro',input:text,voice:'af_sky',response_format:'mp3',speed:.9})});if(!r.ok)throw new Error('TTS unavailable');const blob=await r.blob();state.audioUrl=URL.createObjectURL(blob);state.audio=new Audio(state.audioUrl);state.audio.onended=reset;state.audio.onerror=reset;await state.audio.play();return}catch(e){}}
+    if(!('speechSynthesis' in window)){reset();toast('Speech is not available in this browser.');return}const u=new SpeechSynthesisUtterance(text);u.lang='ja-JP';u.rate=.85;const voices=speechSynthesis.getVoices().filter(v=>v.lang.toLowerCase().startsWith('ja'));if(voices[0])u.voice=voices[0];u.onend=reset;u.onerror=reset;speechSynthesis.speak(u)
+  }
+  async function copyText(text,message){try{await navigator.clipboard.writeText(text)}catch(e){const t=document.createElement('textarea');t.value=text;document.body.appendChild(t);t.select();document.execCommand('copy');t.remove()}toast(message)}
+  function storyAsText(){if(!state.story)return '';return `${plainSegments(state.story.title)}\n${state.story.title_english}\n\n`+state.story.paragraphs.map(p=>plainSegments(p.segments)+'\n'+p.english).join('\n\n')}
+  function toggleKey(inputId,buttonId){const hidden=$(inputId).type==='password';$(inputId).type=hidden?'text':'password';$(buttonId).textContent=hidden?'Hide key':'Show key'}
+
+  $('providerChoice').addEventListener('click',e=>{if(e.target.dataset.value)selectProvider(e.target.dataset.value)});
+  $('styleChoice').addEventListener('click',e=>{if(e.target.dataset.value)selectStyle(e.target.dataset.value)});
+  $('furiganaChoice').addEventListener('click',e=>{if(e.target.dataset.value)setFurigana(e.target.dataset.value)});
+  $('level').addEventListener('change',savePrefs);$('length').addEventListener('change',savePrefs);['model','openaiModel','customEndpoint','customModel'].forEach(id=>$(id).addEventListener('change',savePrefs));
+  $('surprise').addEventListener('click',()=>{$('theme').value=themes[Math.floor(Math.random()*themes.length)]});
+  $('showKey').addEventListener('click',()=>toggleKey('apiKey','showKey'));$('showOpenaiKey').addEventListener('click',()=>toggleKey('openaiKey','showOpenaiKey'));$('showCustomKey').addEventListener('click',()=>toggleKey('customKey','showCustomKey'));
+  [['nihongo_venice_key','apiKey','rememberKey'],['nihongo_openai_key','openaiKey','rememberOpenaiKey'],['nihongo_custom_key','customKey','rememberCustomKey']].forEach(([storage,input,remember])=>{$(input).addEventListener('change',()=>persistKey(storage,input,remember));$(remember).addEventListener('change',()=>persistKey(storage,input,remember))});
+  $('generate').addEventListener('click',generate);$('sample').addEventListener('click',()=>render(normalizeStory(sample),'Sample'));
+  $('allTranslations').addEventListener('click',()=>{state.translations=!state.translations;document.querySelectorAll('.translation').forEach(e=>e.classList.toggle('on',state.translations));document.querySelectorAll('.para-actions button:first-child').forEach(b=>b.textContent=state.translations?'Hide English':'English');$('allTranslations').textContent=state.translations?'Hide English':'Show English'});
+  $('copyStory').addEventListener('click',()=>copyText(storyAsText(),'Story copied.'));
+  document.querySelectorAll('.wallet-copy').forEach(button=>button.addEventListener('click',async()=>{await copyText(button.dataset.address,`${button.dataset.wallet} address copied.`);const label=button.textContent;button.textContent='Copied';setTimeout(()=>button.textContent=label,1400)}));
+  window.addEventListener('beforeunload',stopAudio);restore();
+})();
+</script>
+</body>
+</html>
