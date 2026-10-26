@@ -76,6 +76,10 @@
     .grammar{margin:0;padding-left:18px;color:#d3dbe4}
     .grammar li+li{margin-top:8px}
     .empty{color:var(--muted);font-size:.9rem}
+    .more-stories{margin:0;border-top:1px solid var(--line);padding:13px 22px 16px;color:var(--muted);font-size:.82rem;line-height:1.5;text-align:center}
+    .more-stories a{color:var(--accent2);text-decoration:none}
+    .more-stories a:hover{text-decoration:underline}
+    .more-stories a:focus-visible{outline:3px solid rgba(243,181,99,.42);outline-offset:3px}
     .toast{position:fixed;right:18px;bottom:18px;background:#243043;color:var(--text);border:1px solid #45546a;border-radius:10px;padding:10px 14px;box-shadow:var(--shadow);opacity:0;transform:translateY(10px);pointer-events:none;transition:.18s}
     .toast.on{opacity:1;transform:none}
     .support-bar{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;margin-top:22px;padding:15px 18px;background:linear-gradient(135deg,rgba(243,181,99,.09),rgba(115,218,202,.05));border:1px solid var(--line);border-radius:15px}
@@ -93,7 +97,7 @@
     .wallet-row{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:9px}
     .wallet-info{min-width:0}.wallet-info b{display:block;color:var(--text);font-size:.76rem;margin-bottom:2px}.wallet-info code{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--green);font-size:.7rem}
     .wallet-copy{padding:6px 9px!important;font-size:.75rem!important}
-    @media(max-width:760px){.wrap{width:min(100% - 20px,1080px);padding-top:22px}header{display:block}.privacy{display:inline-block;margin-top:14px}.field,.field.wide{grid-column:1/-1}.provider-row,.study{grid-template-columns:1fr}.reader-head{display:block}.reader-tools{justify-content:flex-start;margin-top:14px}.builder,.reader-head,.story,.study{padding-left:15px;padding-right:15px}.status{width:100%;margin-left:0}.japanese{font-size:1.28rem;line-height:2.55}.support-bar{flex-direction:column}.support-actions{width:100%}.support-main{width:100%}.wallet-copy{width:auto!important}}
+    @media(max-width:760px){.wrap{width:min(100% - 20px,1080px);padding-top:22px}header{display:block}.privacy{display:inline-block;margin-top:14px}.field,.field.wide{grid-column:1/-1}.provider-row,.study{grid-template-columns:1fr}.reader-head{display:block}.reader-tools{justify-content:flex-start;margin-top:14px}.builder,.reader-head,.story,.study,.more-stories{padding-left:15px;padding-right:15px}.status{width:100%;margin-left:0}.japanese{font-size:1.28rem;line-height:2.55}.support-bar{flex-direction:column}.support-actions{width:100%}.support-main{width:100%}.wallet-copy{width:auto!important}}
     @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
   </style>
 </head>
@@ -144,6 +148,7 @@
     </div>
     <div class="story" id="story"></div>
     <div class="study"><div><h3>Useful words</h3><div class="chips" id="vocabulary"></div></div><div><h3>Grammar to notice</h3><ul class="grammar" id="grammar"></ul></div></div>
+    <p class="more-stories"><a href="https://kotobacove.com" target="_blank" rel="noopener">Want more stories / JLPT reading practice? Try Kotoba Cove → kotobacove.com</a></p>
   </section>
   <aside class="support-bar" aria-label="Optional project support">
     <div><strong>&#9749; Support Nihongo Story Reader</strong><p>Every feature stays free. Optional support helps maintain and improve the reader.</p></div>
